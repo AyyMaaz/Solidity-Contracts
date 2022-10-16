@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: MIT
+ pragma solidity ^0.8.1;
+
+contract winnerwinnerchickendinner {
+    address public owner;
+    address payable[] public lenders;
+    address payable public winner;
+
+
+constructor(){
+    owner=msg.sender;
+}
+
+receive() external payable{
+require(msg.value==1 ether && msg.sender!=owner);
+ 
+pusher();
+}
+
+function pusher()  public {
+    lenders.push(payable(msg.sender));
+}
+function winnerbalance() public view returns(uint){
+  require(msg.sender==owner);
+  return address(winner).balance;
+} 
+function checkbalance() public view returns(uint){
+  require(msg.sender==owner);
+  return address(this).balance;
+} 
+function rander() public  view  returns (uint){
+  return uint(keccak256(abi.encodePacked(block.difficulty,block.timestamp,lenders.length)));
+}
+function selectwinner() public returns(address) {
+    require(msg.sender==owner &&lenders.length==2);
+    uint r=rander();
+    uint index=r%lenders.length;
+    winner=lenders[index];
+    return winner;
+
+ }
+function paywinner() public {
+  
+   winner.transfer(checkbalance());
+
+
+}
+} 
+

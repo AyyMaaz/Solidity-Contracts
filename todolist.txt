@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.7;
+contract todolist{
+
+    string[] public todolists;
+
+
+    function toaddlist(string memory _list) public{
+
+          todolists.push(_list);
+    }
+
+    function deleteList(uint index) public {
+     require(todolists.length>1);
+     todolists[index]="";
+   
+    }
+
+    function deletall() public {
+       require(todolists.length>1);
+     for(uint i;i<todolists.length;i++){
+         todolists[i]="";
+
+     }
+  }
+        function returnsize() public view returns(uint){
+
+        return  todolists.length;
+    }
+  
+}

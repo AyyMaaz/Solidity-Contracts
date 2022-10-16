@@ -1,0 +1,233 @@
+
+add books for in the list onlyowner
+add books for sale
+
+buy books everyone
+
+0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2,"a","a"
+
+Library management system is a software that uses to maintain the record of the library. It contains work like the number of available books in the library, the number
+ of books are issued or returning or renewing a book or late fine charge record, etc. Library Management Systems is software that helps to maintain a database that is
+ useful to enter new books & record books borrowed by the members, with the respective submission dates. Moreover, it also reduces the manual record burden of the 
+librarian.
+Library management system allows the librarian to maintain library resources in a more operative manner that will help to save their time. It is also convenient for
+ the librarian to manage the process of books allotting and making payment. Library management system is also useful for students as well as a librarian to keep the 
+constant track of the availability of all books in a store.
+
+A library management system is the most proficient and easy to use system for managing all the processes involved in a Library in the most effective ways.
+
+This system will reduce all the manual work and the whole process can be managed just through single clicks and edits.
+
+There will be no headache and doubtfulness of storing the data securely and searching the records of any individual afterward.
+
+Any book seeker can rent a book just by signing in with their details, and return it with the date of returning.
+
+
+
+
+
+
+
+
+
+
+
+
+ // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.7;
+// supplyer will submit book
+// create books for sale onlyowner
+// buy books everyone
+contract Library{
+
+    address payable owner;
+    uint public totalBooks;
+    uint public booksissued;
+    uint public currentBooks;
+  
+
+    struct Book{
+        address  ownedBy;
+        address bookId;
+        string bookTitle;
+        string bookAuthor;
+        uint price; 
+        bool forSale;
+        uint issuedDate;       
+
+    }
+    constructor(){
+        owner=payable(msg.sender);
+    }
+    mapping(uint=>Book) public books;
+    address[] public booksList;
+    // mapping(uint=>mapping(address=>Book)) public supplier;
+    uint currentid;
+
+    function addbook(address _bookId,string memory _bookTitle,string memory _bookAuthor)public{
+     require(owner==msg.sender);
+     Book storage mybook=books[currentid];
+     mybook.bookId=_bookId;
+     mybook.ownedBy=msg.sender;
+     mybook.bookTitle=_bookTitle;
+     mybook.bookAuthor=_bookAuthor;
+     mybook.price=1 ether;
+     mybook.forSale=false;
+    
+    //  mybook.returnDate=block.timestamp+ _returnDate;
+     totalBooks++;
+      currentBooks++;
+     
+     booksList.push( mybook.bookId);
+    }
+      
+    function buybook(uint Id)public payable{
+     require(owner!=msg.sender);
+     Book storage getbook=books[Id];
+     require(getbook.forSale==true,"Book is not for sale");
+    require(getbook.price>=msg.value,"price limit is not succeed");
+     getbook.issuedDate=block.timestamp;
+     getbook.ownedBy=msg.sender;
+     getbook.forSale=false;
+
+     payable(owner).transfer(msg.value);
+ 
+    //  mybook.returnDate=block.timestamp+ _returnDate;
+      currentBooks--;
+      booksissued++;
+    }
+
+
+function forsale(uint id)public{
+    Book storage thebook=books[id];
+    thebook.forSale=true;
+}
+
+
+
+
+//    function tobuybook(address book,uint num)public  {
+//     //    require(isSupplied==true,"No  book found");
+//        for(uint i;i<booksID.length;i++){
+//          if(book==booksID[i]&& msg.value>mybook.price){
+//       Book storage buymybook=books[num];
+         
+//      buymybook.ownedBy=msg.sender;
+
+//     buymybook.isSupplied=true;
+//      totalBooks--;
+
+
+
+//  }
+//        }
+//    }
+
+   }
+
+
+
+Final result
+
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.7;
+// supplyer will submit book
+// create books for sale onlyowner
+// buy books everyone
+contract Library{
+
+    address payable owner;
+    uint public totalBooks;
+    uint public booksissued;
+    uint public currentBooks;
+  
+
+    struct Book{
+        address  ownedBy;
+        address bookId;
+        string bookTitle;
+        string bookAuthor;
+        uint price; 
+        bool forSale;
+        uint issuedDate;  
+        uint returnDate;     
+
+    }
+    constructor(){
+        owner=payable(msg.sender);
+    }
+    mapping(uint=>Book) public books;
+    address[] public booksList;
+    address[] public listsofbuyers;
+    // mapping(uint=>mapping(address=>Book)) public supplier;
+    uint currentid;
+
+    function addbook(address _bookId,string memory _bookTitle,string memory _bookAuthor,uint _returnDate)public{
+     require(owner==msg.sender);
+     Book storage mybook=books[currentid];
+     mybook.bookId=_bookId;
+     mybook.ownedBy=msg.sender;
+     mybook.bookTitle=_bookTitle;
+     mybook.bookAuthor=_bookAuthor;
+     mybook.returnDate=_returnDate;
+     mybook.price=1 ether;
+     mybook.forSale=false;
+    
+    //  mybook.returnDate=block.timestamp+ _returnDate;
+     totalBooks++;
+      currentBooks++;
+     
+     booksList.push( mybook.bookId);
+    }
+
+    function buybook(uint Id)public payable{
+     require(owner!=msg.sender,"you are not the owner");
+     Book storage getbook=books[Id];
+     require(getbook.forSale==true,"Book is not for sale");
+    require(getbook.price>=msg.value,"price limit is not succeed");
+     getbook.issuedDate=block.timestamp;
+     getbook.ownedBy=msg.sender;
+     getbook.forSale=false;
+     uint interest=2 wei;
+     uint amount=getbook.price+ interest;
+     if(block.timestamp>getbook.returnDate){
+         payable(owner).transfer(amount);
+     }
+
+     payable(owner).transfer(msg.value);
+     listsofbuyers.push(msg.sender);
+ 
+    //  mybook.returnDate=block.timestamp+ _returnDate;
+      currentBooks--;
+      booksissued++;
+    }
+function forsale(uint id)public{
+    Book storage thebook=books[id];
+    thebook.forSale=true;
+}
+function checkownerbalance()public view returns(uint){
+    return owner.balance;
+}
+
+
+
+//    function tobuybook(address book,uint num)public  {
+//     //    require(isSupplied==true,"No  book found");
+//        for(uint i;i<booksID.length;i++){
+//          if(book==booksID[i]&& msg.value>mybook.price){
+//       Book storage buymybook=books[num];
+         
+//      buymybook.ownedBy=msg.sender;
+
+//     buymybook.isSupplied=true;
+//      totalBooks--;
+
+
+
+//  }
+//        }
+//    }
+
+   }

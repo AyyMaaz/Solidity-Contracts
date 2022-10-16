@@ -1,0 +1,120 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.9;
+
+contract Staking{
+    address public owner;
+    struct Position{
+        uint positionId ;
+        address  walletAddress;
+        uint createdDate ;
+        uint unlockDate ;
+        uint percentInterest;
+        uint weiStaking;
+        uint weiInterest;
+        bool open;
+    }
+        Position position;
+        uint public currentPositionid;
+        mapping(uint=>Position) public positions;
+        mapping(address=>uint[]) public positionIdsByAddress;
+        mapping(uint=>uint) public tiers;
+        uint[] public lockPeriods;
+
+
+
+        constructor() payable{
+            currentPositionid=0;
+            owner=msg.sender;
+            tiers[30]=700;
+            tiers[90]=1000;
+            tiers[100]=1200;
+            lockPeriods.push(30);
+            lockPeriods.push(90);
+
+            lockPeriods.push(100);
+
+        }
+
+
+
+        function stakeEther(uint numdays) public payable{
+
+            positions[currentPositionid]=Position(
+
+                currentPositionid,
+                msg.sender,
+                block.timestamp,
+                block.timestamp +(numdays * 1 days),
+                tiers[numdays],
+                msg.value,
+                currentinterest(tiers[numdays],  msg.value),
+                true
+
+            );
+            //stores the index and  sender of the function in  positionidaddress
+            //For eg which address depoyed the zeroth index
+            positionIdsByAddress[msg.sender].push(currentPositionid);
+            currentPositionid++;
+        }
+
+    
+    
+function makelockperiods(uint numdays,uint baseinfo)public{
+    require(msg.sender==owner,"only owner can doit");
+    tiers[numdays]=baseinfo;
+    lockPeriods.push(numdays);
+}
+
+function getLockPeriods()public view returns(uint[] memory){
+    return lockPeriods;
+
+}
+
+function getInterestRate(uint numdays)public view returns(uint){
+    return tiers[numdays];
+
+}
+//position of whole struct
+function getPositionByid(uint positionId)public view returns(Position memory){
+    return positions[positionId];
+
+}
+
+//position of address who stakeether
+function getPositionIdsForAddress(address walletadd)public view returns(uint[] memory){
+    return positionIdsByAddress[walletadd];
+
+}
+
+function changeUnlockDate(uint newdate,uint positionId)public{
+      require(msg.sender==owner,"Only owner may modify staking period" );
+    positions[positionId].unlockDate=newdate;
+
+}
+
+  function closePosition(uint positionId) public{
+    require(positions[positionId].walletAddress==msg.sender);
+    require(positions[positionId].open==true);
+    positions[positionId].open==false;
+    uint amount=positions[positionId].weiStaking+positions[positionId].weiInterest;
+    uint onlyamount=positions[positionId].weiStaking;
+    if(block.timestamp>positions[positionId].unlockDate){
+        payable(msg.sender).transfer(amount);
+    
+    }
+    else{
+            payable(msg.sender).transfer(onlyamount);
+        
+    }
+
+
+
+    }
+       function currentinterest (uint baseinfo,uint weireq) private pure returns(uint){
+        return (baseinfo * weireq/1000);
+
+
+       }
+
+
+}
